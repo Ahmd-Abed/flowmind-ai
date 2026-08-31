@@ -1,63 +1,52 @@
+const asyncHandler = require("../../utils/asyncHandler");
 const authService = require("./auth.service");
 
-const register = async (req, res) => {
-  try {
-    const user = await authService.registerUser(req.body);
+const register = asyncHandler(async (req, res) => {
+  const user = await authService.registerUser(req.body);
 
-    res.status(201).json({
-      message: "User created successfully",
+  res.status(201).json({
+    message: "User created successfully",
 
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+});
 
-const login = async (req, res) => {
-  try {
-    const result = await authService.loginUser(req.body);
+const login = asyncHandler(async (req, res) => {
+  const result = await authService.loginUser(req.body);
 
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
+  res.cookie("refreshToken", result.refreshToken, {
+    httpOnly: true,
 
-      secure: false,
+    secure: false,
 
-      sameSite: "strict",
+    sameSite: "strict",
 
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
 
-    res.json({
-      message: "Login successful",
+  res.json({
+    message: "Login successful",
 
-      accessToken: result.accessToken,
+    accessToken: result.accessToken,
 
-      user: {
-        id: result.user._id,
-        name: result.user.name,
-        email: result.user.email,
-      },
-    });
-  } catch (error) {
-    res.status(401).json({
-      message: error.message,
-    });
-  }
-};
-const logout = (req, res) => {
+    user: {
+      id: result.user._id,
+      name: result.user.name,
+      email: result.user.email,
+    },
+  });
+});
+const logout = asyncHandler(async (req, res) => {
   res.clearCookie("refreshToken");
 
   res.json({
     message: "Logged out",
   });
-};
+});
 module.exports = {
   register,
   login,
