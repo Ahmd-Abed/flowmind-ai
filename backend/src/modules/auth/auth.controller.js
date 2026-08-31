@@ -1,44 +1,65 @@
-// const authService = require("./auth.service");
+const authService = require("./auth.service");
 
-// const register = async (req, res, next) => {
-//   try {
-//     const { name, email, password } = req.body;
-//     const result = await authService.register({ name, email, password });
+const register = async (req, res) => {
+  try {
+    const user = await authService.registerUser(req.body);
 
-//     return res.status(201).json({
-//       success: true,
-//       message: "User registered successfully",
-//       data: result,
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
+    res.status(201).json({
+      message: "User created successfully",
 
-// const login = async (req, res, next) => {
-//   try {
-//     const { email, password } = req.body;
-//     const result = await authService.login({ email, password });
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
 
-//     return res.status(200).json({
-//       success: true,
-//       message: "Login successful",
-//       data: result,
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
+const login = async (req, res) => {
+  try {
+    const result = await authService.loginUser(req.body);
 
-// const me = async (req, res) => {
-//   return res.status(200).json({
-//     success: true,
-//     data: req.user,
-//   });
-// };
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
 
-// module.exports = {
-//   register,
-//   login,
-//   me,
-// };
+      secure: false,
+
+      sameSite: "strict",
+
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      message: "Login successful",
+
+      accessToken: result.accessToken,
+
+      user: {
+        id: result.user._id,
+        name: result.user.name,
+        email: result.user.email,
+      },
+    });
+  } catch (error) {
+    res.status(401).json({
+      message: error.message,
+    });
+  }
+};
+const logout = (req, res) => {
+  res.clearCookie("refreshToken");
+
+  res.json({
+    message: "Logged out",
+  });
+};
+module.exports = {
+  register,
+  login,
+  logout,
+};

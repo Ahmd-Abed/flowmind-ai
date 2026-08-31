@@ -1,63 +1,61 @@
-// const bcrypt = require("bcrypt");
-// const User = require("../users/user.model");
-// const { signToken } = require("../../utils/jwt");
+const bcrypt = require("bcrypt");
+const User = require("../users/user.model");
 
-// const sanitizeUser = (userDoc) => ({
-//   id: userDoc._id,
-//   name: userDoc.name,
-//   email: userDoc.email,
-// });
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../../utils/jwt");
+const registerUser = async (data) => {
+  const existingUser = await User.findOne({
+    email: data.email,
+  });
 
-// const register = async ({ name, email, password }) => {
-//   const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error("Email already exists");
+  }
 
-//   if (existingUser) {
-//     const error = new Error("Email already in use");
-//     error.statusCode = 409;
-//     throw error;
-//   }
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-//   const hashedPassword = await bcrypt.hash(password, 10);
-//   const user = await User.create({
-//     name,
-//     email,
-//     password: hashedPassword,
-//   });
+  const user = await User.create({
+    name: data.name,
 
-//   const token = signToken({ sub: user._id.toString(), email: user.email });
+    email: data.email,
 
-//   return {
-//     user: sanitizeUser(user),
-//     token,
-//   };
-// };
+    password: hashedPassword,
+  });
 
-// const login = async ({ email, password }) => {
-//   const user = await User.findOne({ email });
+  return user;
+};
 
-//   if (!user) {
-//     const error = new Error("Invalid email or password");
-//     error.statusCode = 401;
-//     throw error;
-//   }
+const loginUser = async (data) => {
+  const user = await User.findOne({
+    email: data.email,
+  });
 
-//   const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!user) {
+    throw new Error("Invalid credentials");
+  }
 
-//   if (!isPasswordValid) {
-//     const error = new Error("Invalid email or password");
-//     error.statusCode = 401;
-//     throw error;
-//   }
+  const passwordMatch = await bcrypt.compare(data.password, user.password);
 
-//   const token = signToken({ sub: user._id.toString(), email: user.email });
+  if (!passwordMatch) {
+    throw new Error("Invalid credentials");
+  }
 
-//   return {
-//     user: sanitizeUser(user),
-//     token,
-//   };
-// };
+  const accessToken = generateAccessToken(user._id);
 
-// module.exports = {
-//   register,
-//   login,
-// };
+  const refreshToken = generateRefreshToken(user._id);
+
+  return {
+    user,
+
+    accessToken,
+
+    refreshToken,
+  };
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+};

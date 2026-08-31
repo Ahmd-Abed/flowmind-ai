@@ -1,15 +1,30 @@
-// const jwt = require("jsonwebtoken");
-// const env = require("../config/env");
+const jwt = require("jsonwebtoken");
 
-// const signToken = (payload) => {
-//   return jwt.sign(payload, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
-// };
+const generateAccessToken = (userId) => {
+  return jwt.sign(
+    {
+      id: userId,
+    },
+    process.env.JWT_ACCESS_SECRET,
+    {
+      expiresIn: "15m",
+    },
+  );
+};
 
-// const verifyToken = (token) => {
-//   return jwt.verify(token, env.jwtSecret);
-// };
+const generateRefreshToken = (userId) => {
+  return jwt.sign(
+    {
+      id: userId,
+    },
+    process.env.JWT_REFRESH_SECRET,
+    {
+      expiresIn: "30d",
+    },
+  );
+};
 
-// module.exports = {
-//   signToken,
-//   verifyToken,
-// };
+module.exports = {
+  generateAccessToken,
+  generateRefreshToken,
+};
