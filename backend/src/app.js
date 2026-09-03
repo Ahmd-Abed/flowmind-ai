@@ -15,7 +15,8 @@ app.use(helmet());
 
 app.use(morgan("dev"));
 app.use("/api/auth", authRoutes);
-
+const workspaceRoutes = require("./modules/workspaces/workspace.routes");
+app.use("/api/workspaces", workspaceRoutes);
 app.use(errorHandler);
 app.get("/api/profile", protect, (req, res) => {
   res.json({
