@@ -106,6 +106,34 @@ const updateMemberRole = async (workspaceId, userId, role) => {
 
   return workspace;
 };
+const removeMemberFromWorkspace = async (workspaceId, userId) => {
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new Error("Workspace not found");
+  }
+
+  // Prevent removing the workspace owner
+  if (workspace.owner.toString() === userId) {
+    throw new Error("Workspace owner cannot be removed");
+  }
+
+  const memberExists = workspace.members.some(
+    (member) => member.user.toString() === userId,
+  );
+
+  if (!memberExists) {
+    throw new Error("User is not a member of this workspace");
+  }
+
+  workspace.members = workspace.members.filter(
+    (member) => member.user.toString() !== userId,
+  );
+
+  await workspace.save();
+
+  return workspace;
+};
 module.exports = {
   createWorkspace,
   getUserWorkspaces,
@@ -113,4 +141,5 @@ module.exports = {
   deleteWorkspace,
   addMemberToWorkspace,
   updateMemberRole,
+  removeMemberFromWorkspace,
 };

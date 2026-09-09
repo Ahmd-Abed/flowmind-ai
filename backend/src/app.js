@@ -25,6 +25,9 @@ app.get("/api/profile", protect, (req, res) => {
     userId: req.userId,
   });
 });
+const invitationRoutes = require("./modules/workspaces/invitations/invitation.routes");
+
+app.use("/api", invitationRoutes);
 app.get("/", (req, res) => {
   res.json({
     message: "FlowMind API Running",

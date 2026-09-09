@@ -73,6 +73,17 @@ const updateMemberRole = asyncHandler(async (req, res) => {
     workspace,
   });
 });
+const removeMember = asyncHandler(async (req, res) => {
+  const workspace = await workspaceService.removeMemberFromWorkspace(
+    req.params.workspaceId,
+    req.params.userId,
+  );
+
+  res.status(200).json({
+    message: "Member removed successfully",
+    workspace,
+  });
+});
 module.exports = {
   createWorkspace,
   getMyWorkspaces,
@@ -80,4 +91,5 @@ module.exports = {
   deleteWorkspace,
   addMember,
   updateMemberRole,
+  removeMember,
 };

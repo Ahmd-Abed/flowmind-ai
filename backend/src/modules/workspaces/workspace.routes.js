@@ -41,8 +41,14 @@ router.patch(
 
   protect,
 
-  checkWorkspaceRole("owner"),
+  checkWorkspaceRole("owner", "admin"),
 
   controller.updateMemberRole,
+);
+router.delete(
+  "/:workspaceId/members/:userId",
+  protect,
+  checkWorkspaceRole("owner", "admin"),
+  controller.removeMember,
 );
 module.exports = router;
