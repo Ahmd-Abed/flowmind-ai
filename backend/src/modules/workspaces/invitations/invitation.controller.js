@@ -1,4 +1,4 @@
-const asyncHandler = require("../../utils/asyncHandler");
+const asyncHandler = require("../../../utils/asyncHandler");
 
 const invitationService = require("./invitation.service");
 

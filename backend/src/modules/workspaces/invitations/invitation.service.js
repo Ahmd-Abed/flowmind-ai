@@ -1,8 +1,8 @@
 const crypto = require("crypto");
 
 const Invitation = require("./invitation.model");
-const Workspace = require("./workspace.model");
-const User = require("../users/user.model");
+const Workspace = require("../workspace.model");
+const User = require("../../users/user.model");
 
 const createInvitation = async (workspaceId, data, userId) => {
   const workspace = await Workspace.findById(workspaceId);
