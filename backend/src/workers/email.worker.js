@@ -1,17 +1,8 @@
 const { Worker } = require("bullmq");
+require("dotenv").config();
 
 const connection = require("../config/redis");
-
-const nodemailer = require("nodemailer");
-require("dotenv").config();
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const { sendInvitationEmail } = require("../utils/email");
 
 const worker = new Worker(
   "email",
@@ -21,27 +12,7 @@ const worker = new Worker(
 
     const { email, token } = job.data;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-
-      to: email,
-
-      subject: "FlowMind Workspace Invitation",
-
-      html: `
-<h2>You are invited to FlowMind AI</h2>
-
-<p>
-Click the link below to join the workspace:
-</p>
-
-
-<a href="http://localhost:3000/invitations/${token}">
-Accept Invitation
-</a>
-
-`,
-    });
+    await sendInvitationEmail({ email, token });
 
     console.log("Email sent to", email);
   },

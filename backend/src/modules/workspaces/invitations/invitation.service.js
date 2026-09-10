@@ -3,6 +3,34 @@ const crypto = require("crypto");
 const Invitation = require("./invitation.model");
 const Workspace = require("../workspace.model");
 const User = require("../../users/user.model");
+const { sendInvitationEmail } = require("../../../utils/email");
+
+const withTimeout = (promise, ms, message) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]);
+
+const dispatchInvitationEmail = async (email, token) => {
+  if (process.env.EMAIL_QUEUE_ENABLED === "true") {
+    try {
+      const emailQueue = require("../../../jobs/email.queue");
+
+      await withTimeout(
+        emailQueue.add("sendInvitationEmail", { email, token }),
+        3000,
+        "Email queue timed out",
+      );
+      return;
+    } catch (error) {
+      console.error("Email queue unavailable, sending directly:", error.message);
+    }
+  }
+
+  await sendInvitationEmail({ email, token });
+};
 
 const createInvitation = async (workspaceId, data, userId) => {
   const workspace = await Workspace.findById(workspaceId);
@@ -53,11 +81,10 @@ const createInvitation = async (workspaceId, data, userId) => {
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
 
-  const emailQueue = require("../../../jobs/email.queue");
-  await emailQueue.add("sendInvitationEmail", {
-    email: data.email,
-    token,
+  dispatchInvitationEmail(data.email, token).catch((error) => {
+    console.error("Invitation email failed:", error.message);
   });
+
   return invitation;
 };
 
