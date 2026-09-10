@@ -17,7 +17,8 @@ app.use(morgan("dev"));
 app.use("/api/auth", authRoutes);
 const workspaceRoutes = require("./modules/workspaces/workspace.routes");
 app.use("/api/workspaces", workspaceRoutes);
-app.use(errorHandler);
+const taskRoutes = require("./modules/tasks/task.routes");
+app.use("/api/workspaces/:workspaceId/tasks", taskRoutes);
 app.get("/api/profile", protect, (req, res) => {
   res.json({
     message: "Protected route",
@@ -37,5 +38,7 @@ app.get("/", (req, res) => {
     message: "FlowMind API Running",
   });
 });
+
+app.use(errorHandler);
 
 module.exports = app;
