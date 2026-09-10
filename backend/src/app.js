@@ -28,6 +28,10 @@ app.get("/api/profile", protect, (req, res) => {
 const invitationRoutes = require("./modules/workspaces/invitations/invitation.routes");
 
 app.use("/api", invitationRoutes);
+
+const messageRoutes = require("./modules/chat/message.routes");
+
+app.use("/api/workspaces", messageRoutes);
 app.get("/", (req, res) => {
   res.json({
     message: "FlowMind API Running",

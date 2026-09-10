@@ -4,9 +4,9 @@ const router = express.Router();
 
 const controller = require("./invitation.controller");
 
-const { protect } = require("../../middleware/auth.middleware");
+const { protect } = require("../../../middleware/auth.middleware");
 
-const checkWorkspaceRole = require("../../middleware/workspaceRole.middleware");
+const checkWorkspaceRole = require("../../../middleware/workspaceRole.middleware");
 
 // Create invitation
 

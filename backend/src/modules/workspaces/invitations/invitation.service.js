@@ -1,9 +1,9 @@
 const crypto = require("crypto");
 
 const Invitation = require("./invitation.model");
-const Workspace = require("./workspace.model");
-const User = require("../users/user.model");
-
+const Workspace = require("../workspace.model");
+const User = require("../../users/user.model");
+const emailQueue = require("../../../jobs/email.queue");
 const createInvitation = async (workspaceId, data, userId) => {
   const workspace = await Workspace.findById(workspaceId);
 
@@ -52,7 +52,10 @@ const createInvitation = async (workspaceId, data, userId) => {
 
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
-
+  await emailQueue.add("sendInvitationEmail", {
+    email: data.email,
+    token,
+  });
   return invitation;
 };
 
